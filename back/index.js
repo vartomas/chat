@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const { Server } = require('socket.io');
 
 const routes = require('./routes');
+const registerMessageHandlers = require('./message/messageHandlers');
 
 mongoose
   .connect('mongodb://localhost/db', {
@@ -25,11 +26,10 @@ app.use(express.json());
 
 app.use('/', routes);
 
-io.on('connection', (socket) => {
-  console.log('New connection with id: ' + socket.id);
-  socket.on('message', (message) => {
-    console.log(message);
-  });
-});
+const onConnection = (socket) => {
+  registerMessageHandlers(io, socket);
+};
+
+io.on('connection', onConnection);
 
 server.listen(5000, () => console.log('listening'));
