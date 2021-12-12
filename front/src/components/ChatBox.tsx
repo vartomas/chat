@@ -1,30 +1,44 @@
-import { Center, Box, ActionIcon, Textarea } from '@mantine/core';
+import { ActionIcon, Box, Center, Text, Textarea, LoadingOverlay, Paper } from '@mantine/core';
 import { BiPaperPlane } from 'react-icons/bi';
+import moment from 'moment';
 
 import { useChat } from '../hooks/useChat';
 
 const ChatBox = () => {
-  const { message, onMessageChange, onSubmit, catchEnter } = useChat();
+  const { input, loading, messages, onInputChange, onSubmit, catchEnter } = useChat();
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <Box sx={{ flex: 11 }}></Box>
+      <Box sx={{ height: '90%', display: 'flex', flexDirection: 'column-reverse', overflow: 'auto' }}>
+        {messages.map((x) => (
+          <Paper key={x.id} padding="sm" shadow="xs" radius="md" mb={10} mx={10} sx={{ width: '70%' }}>
+            <Text size="xs" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <b>{x.username}</b> {moment(x.date).format('Do MMMM YYYY, h:mm a')}
+            </Text>
+            <Text mt={5}>{x.body}</Text>
+          </Paper>
+        ))}
+      </Box>
       <Box
         sx={(theme) => ({
-          flex: 1,
+          height: '10%',
           backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[1],
         })}
       >
-        <form onSubmit={onSubmit}>
-          <Box sx={{ display: 'flex' }}>
+        <form onSubmit={onSubmit} style={{ height: '100%' }}>
+          <Box sx={{ display: 'flex', height: '100%' }}>
             <Textarea
               sx={{
                 width: '100%',
                 paddingTop: 5,
                 paddingBottom: 5,
               }}
-              value={message}
-              onChange={(e) => onMessageChange(e.target.value)}
+              styles={{
+                root: { height: '100%' },
+                input: { height: '100%' },
+              }}
+              value={input}
+              onChange={(e) => onInputChange(e.target.value)}
               onKeyDown={catchEnter}
             />
             <Center sx={{ padding: 15 }}>
@@ -36,6 +50,8 @@ const ChatBox = () => {
           <input type="submit" style={{ display: 'none' }} />
         </form>
       </Box>
+
+      <LoadingOverlay visible={loading} />
     </Box>
   );
 };

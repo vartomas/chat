@@ -2,6 +2,7 @@ const express = require('express');
 const { createServer } = require('http');
 const mongoose = require('mongoose');
 const { Server } = require('socket.io');
+const cors = require('cors');
 
 const routes = require('./routes');
 const registerMessageHandlers = require('./message/messageHandlers');
@@ -21,6 +22,12 @@ const io = new Server(server, {
     origin: ['http://localhost:3000'],
   },
 });
+
+const corsOptions = {
+  exposedHeaders: ['token'],
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 

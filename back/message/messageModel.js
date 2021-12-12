@@ -2,6 +2,11 @@ const mongoose = require('mongoose');
 
 const MessageSchema = mongoose.Schema(
   {
+    id: {
+      type: String,
+      unique: true,
+      required: true,
+    },
     body: {
       type: String,
       required: true,

@@ -2,11 +2,9 @@ const Message = require('./messageModel');
 
 const createMessage = async (req, res) => {
   try {
-    console.log(req.body);
     const message = new Message(req.body);
-    console.log(message);
     await message.save();
-    res.json({ success: true });
+    res.json({ success: true, _id: message._id });
   } catch (e) {
     res.status(400).json(e.message);
   }
@@ -17,9 +15,7 @@ const getMessages = async (req, res) => {
   const skip = 10 * (dose - 1);
   const limit = 10;
 
-  console.log(skip);
-
-  const messages = await Message.find().skip(skip).limit(limit).sort('field -date');
+  const messages = await Message.find().skip(skip).limit(limit).sort('field -createdAt');
 
   res.json(messages);
 
