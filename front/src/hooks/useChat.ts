@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, KeyboardEvent } from 'react';
+import { useState, useEffect, useMemo, KeyboardEvent, useRef } from 'react';
 import axios from 'axios';
 import { v1 as uuid } from 'uuid';
 import { io, Socket } from 'socket.io-client';
@@ -18,6 +18,12 @@ export const useChat = (name: string) => {
   const [messages, setMessages] = useState<MessageResponse[]>([]);
   const [socket, setSocket] = useState<Socket>();
 
+  const messagesEndRef = useRef<null | HTMLDivElement>(null);
+
+  useEffect(() => {
+    getMessages();
+  }, []);
+
   useEffect(() => {
     const socket = io('http://localhost:5000');
     socket.on('connect', () => {
@@ -25,15 +31,20 @@ export const useChat = (name: string) => {
     });
     socket.on('message:new', (message) => {
       setMessages((prev) => [message, ...prev]);
+      scrollToBottom();
     });
   }, []);
 
-  const getMessages = async (dose: number) => {
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const getMessages = async () => {
     setMessagesLoading(true);
 
     try {
-      const response = await axios.get<MessageResponse[]>(`http://localhost:5000/messages/${dose}`);
-      setMessages(response.data);
+      const response = await axios.get<MessageResponse[]>(`http://localhost:5000/messages/${messages.length}`);
+      setMessages((prev) => [...prev, ...response.data]);
     } catch (error) {
       console.error(error);
     }
@@ -50,16 +61,13 @@ export const useChat = (name: string) => {
       if (response.data.success) {
         setMessages((prev) => prev.map((x) => (x.id === message.id ? { ...x, _id: response.data._id } : x)));
         socket?.emit('message:new', { ...message, _id: response.data._id });
+        scrollToBottom();
       }
     } catch (error) {
       setMessages((prev) => [...prev.slice(1, 0)]);
       console.error(error);
     }
   };
-
-  useEffect(() => {
-    getMessages(1);
-  }, []);
 
   const handleSubmit = async () => {
     if (!socket?.id || !input) return;
@@ -88,8 +96,10 @@ export const useChat = (name: string) => {
     loading: messagesLoading,
     messages,
     socketId: socket?.id,
+    messagesEndRef,
     onInputChange: setInput,
     onSubmit: handleSubmit,
     catchEnter,
+    getMessages,
   };
 };

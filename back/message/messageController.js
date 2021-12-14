@@ -11,11 +11,9 @@ const createMessage = async (req, res) => {
 };
 
 const getMessages = async (req, res) => {
-  const dose = req.params.dose;
-  const skip = 10 * (dose - 1);
-  const limit = 10;
+  const count = req.params.count;
 
-  const messages = await Message.find().skip(skip).limit(limit).sort('field -createdAt');
+  const messages = await Message.find().skip(count).limit(20).sort('field -createdAt');
 
   res.json(messages);
 

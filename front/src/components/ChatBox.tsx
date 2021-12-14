@@ -1,4 +1,4 @@
-import { useEffect, useRef, FC } from 'react';
+import { FC } from 'react';
 import { ActionIcon, Box, Center, Text, Textarea, LoadingOverlay, Paper } from '@mantine/core';
 import { BiPaperPlane } from 'react-icons/bi';
 import moment from 'moment';
@@ -10,17 +10,7 @@ interface Props {
 }
 
 const ChatBox: FC<Props> = ({ name }) => {
-  const { input, loading, messages, socketId, onInputChange, onSubmit, catchEnter } = useChat(name);
-
-  const messagesEndRef = useRef<null | HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  const { input, loading, messages, socketId, messagesEndRef, onInputChange, onSubmit, catchEnter, getMessages } = useChat(name);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -28,7 +18,7 @@ const ChatBox: FC<Props> = ({ name }) => {
         sx={(theme) => ({
           maxHeight: '90vh',
           minHeight: '90vh',
-          paddingTop: 10,
+          paddingTop: '20vh',
           display: 'flex',
           flexDirection: 'column-reverse',
           overflowY: 'auto',
@@ -62,6 +52,22 @@ const ChatBox: FC<Props> = ({ name }) => {
             <Text mt={5}>{x.body}</Text>
           </Paper>
         ))}
+
+        <Text
+          mb={10}
+          ml={15}
+          size="xs"
+          sx={{
+            width: 'fit-content',
+            cursor: 'pointer',
+            '&:hover': {
+              textDecoration: 'underline',
+            },
+          }}
+          onClick={getMessages}
+        >
+          Load more messages
+        </Text>
       </Box>
 
       <Box
