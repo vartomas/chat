@@ -23,7 +23,7 @@ const App = () => {
             <SideBar name={name} colorMode={colorMode} setModalOpen={setModalOpen} setColorMode={setColorMode} />
           </Col>
           <Col span={8} xs={8} md={9} lg={10} xl={10.5}>
-            <ChatBox />
+            <ChatBox name={name} />
           </Col>
         </Grid>
 

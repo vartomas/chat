@@ -1,7 +1,7 @@
-import { useState, useEffect, KeyboardEvent } from 'react';
-import { useLocalStorageValue } from '@mantine/hooks';
+import { useState, useEffect, useMemo, KeyboardEvent } from 'react';
 import axios from 'axios';
 import { v1 as uuid } from 'uuid';
+import { io, Socket } from 'socket.io-client';
 
 interface MessageResponse {
   _id?: string;
@@ -12,11 +12,21 @@ interface MessageResponse {
   username: string;
 }
 
-export const useChat = () => {
-  const [name] = useLocalStorageValue<string>({ key: 'name' });
+export const useChat = (name: string) => {
   const [input, setInput] = useState<string>('');
   const [messagesLoading, setMessagesLoading] = useState<boolean>(false);
   const [messages, setMessages] = useState<MessageResponse[]>([]);
+  const [socket, setSocket] = useState<Socket>();
+
+  useEffect(() => {
+    const socket = io('http://localhost:5000');
+    socket.on('connect', () => {
+      setSocket(socket);
+    });
+    socket.on('message:new', (message) => {
+      setMessages((prev) => [message, ...prev]);
+    });
+  }, []);
 
   const getMessages = async (dose: number) => {
     setMessagesLoading(true);
@@ -36,7 +46,11 @@ export const useChat = () => {
 
     try {
       const response = await axios.post<{ success: boolean; _id: string }>('http://localhost:5000/message/', message);
-      if (response.data.success) setMessages((prev) => prev.map((x) => (x.id === message.id ? { ...x, _id: response.data._id } : x)));
+
+      if (response.data.success) {
+        setMessages((prev) => prev.map((x) => (x.id === message.id ? { ...x, _id: response.data._id } : x)));
+        socket?.emit('message:new', { ...message, _id: response.data._id });
+      }
     } catch (error) {
       setMessages((prev) => [...prev.slice(1, 0)]);
       console.error(error);
@@ -47,16 +61,18 @@ export const useChat = () => {
     getMessages(1);
   }, []);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!socket?.id || !input) return;
+
     const message = {
       id: uuid(),
       body: input,
       date: new Date(),
-      socketId: 'bla',
+      socketId: socket.id,
       username: name,
     };
 
-    sendMessage(message);
+    await sendMessage(message);
     setInput('');
   };
 
@@ -71,6 +87,7 @@ export const useChat = () => {
     input,
     loading: messagesLoading,
     messages,
+    socketId: socket?.id,
     onInputChange: setInput,
     onSubmit: handleSubmit,
     catchEnter,
