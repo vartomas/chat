@@ -1,6 +1,6 @@
 module.exports = (io, socket) => {
-  const newMessage = (payload) => {
-    socket.broadcast.emit('message:new', payload);
+  const newMessage = (message) => {
+    socket.broadcast.emit('message:new', message);
   };
 
   socket.on('message:new', newMessage);

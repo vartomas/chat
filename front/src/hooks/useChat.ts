@@ -1,7 +1,9 @@
-import { useState, useEffect, useMemo, KeyboardEvent, useRef } from 'react';
+import { useState, useEffect, KeyboardEvent, useRef } from 'react';
 import axios from 'axios';
 import { v1 as uuid } from 'uuid';
-import { io, Socket } from 'socket.io-client';
+import { io } from 'socket.io-client';
+
+import { User } from '../App';
 
 interface MessageResponse {
   _id?: string;
@@ -12,11 +14,12 @@ interface MessageResponse {
   username: string;
 }
 
-export const useChat = (name: string) => {
+const socket = io('http://localhost:5000');
+
+export const useChat = (name: string, setUsers: React.Dispatch<React.SetStateAction<User[]>>) => {
   const [input, setInput] = useState<string>('');
   const [messagesLoading, setMessagesLoading] = useState<boolean>(false);
   const [messages, setMessages] = useState<MessageResponse[]>([]);
-  const [socket, setSocket] = useState<Socket>();
 
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
@@ -25,9 +28,17 @@ export const useChat = (name: string) => {
   }, []);
 
   useEffect(() => {
-    const socket = io('http://localhost:5000');
     socket.on('connect', () => {
-      setSocket(socket);
+      socket.emit('user:connect', name);
+    });
+    socket.on('user:connect', (user) => {
+      setUsers((prev) => [user, ...prev]);
+    });
+    socket.on('user:disconnect', (socketId) => {
+      setUsers((prev) => prev.filter((x) => x.socketId !== socketId));
+    });
+    socket.on('user:list', (users) => {
+      setUsers(users);
     });
     socket.on('message:new', (message) => {
       setMessages((prev) => [message, ...prev]);

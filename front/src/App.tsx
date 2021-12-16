@@ -8,10 +8,16 @@ import NameChangeModal from './components/NameChangeModal';
 
 export type ColorScheme = 'dark' | 'light';
 
+export interface User {
+  name: string;
+  socketId: string;
+}
+
 const App = () => {
   const [colorMode, setColorMode] = useLocalStorageValue<ColorScheme>({ key: 'color-scheme', defaultValue: 'dark' });
   const [name, setName] = useLocalStorageValue<string>({ key: 'name', defaultValue: 'Guest' });
-  const [modalOpen, setModalOpen] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   return (
     <MantineProvider theme={{ colorScheme: colorMode }}>
@@ -20,10 +26,10 @@ const App = () => {
       >
         <Grid gutter={0} sx={{ height: '100%' }}>
           <Col span={4} xs={4} md={3} lg={2} xl={1.5}>
-            <SideBar name={name} colorMode={colorMode} setModalOpen={setModalOpen} setColorMode={setColorMode} />
+            <SideBar name={name} users={users} colorMode={colorMode} setModalOpen={setModalOpen} setColorMode={setColorMode} />
           </Col>
           <Col span={8} xs={8} md={9} lg={10} xl={10.5}>
-            <ChatBox name={name} />
+            <ChatBox name={name} setUsers={setUsers} />
           </Col>
         </Grid>
 

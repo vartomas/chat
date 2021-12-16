@@ -4,15 +4,17 @@ import { FaUserEdit } from 'react-icons/fa';
 import { Box, Center, Divider, Text, Menu } from '@mantine/core';
 
 import { ColorScheme } from '../App';
+import { User } from '../App';
 
 interface Props {
   name: string;
+  users: User[];
   colorMode: string;
   setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setColorMode: (val: ColorScheme | ((prevState: ColorScheme) => ColorScheme)) => void;
 }
 
-const SideBar: FC<Props> = ({ name, colorMode, setModalOpen, setColorMode }) => {
+const SideBar: FC<Props> = ({ name, users, colorMode, setModalOpen, setColorMode }) => {
   return (
     <Box
       sx={(theme) => ({
@@ -43,6 +45,11 @@ const SideBar: FC<Props> = ({ name, colorMode, setModalOpen, setColorMode }) => 
         </Box>
       </Center>
       <Divider />
+      <Box>
+        {users.map((x) => (
+          <Text key={x.socketId}>{x.name}</Text>
+        ))}
+      </Box>
     </Box>
   );
 };
