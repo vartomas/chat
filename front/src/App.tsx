@@ -10,7 +10,7 @@ export type ColorScheme = 'dark' | 'light';
 
 const App = () => {
   const [colorMode, setColorMode] = useLocalStorageValue<ColorScheme>({ key: 'color-scheme', defaultValue: 'dark' });
-  const [name, setName] = useLocalStorageValue<string>({ key: 'name', defaultValue: 'Svečias' });
+  const [name, setName] = useLocalStorageValue<string>({ key: 'name', defaultValue: 'Guest' });
   const [modalOpen, setModalOpen] = useState(false);
 
   return (

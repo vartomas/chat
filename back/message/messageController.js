@@ -11,9 +11,9 @@ const createMessage = async (req, res) => {
 };
 
 const getMessages = async (req, res) => {
-  const count = req.params.count;
+  const count = Number(req.params.count);
 
-  const messages = await Message.find().skip(count).limit(20).sort('field -createdAt');
+  const messages = await Message.find().sort('field -createdAt').skip(count).limit(20);
 
   res.json(messages);
 

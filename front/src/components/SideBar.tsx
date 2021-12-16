@@ -24,20 +24,20 @@ const SideBar: FC<Props> = ({ name, colorMode, setModalOpen, setColorMode }) => 
         <Text size="md">{name}</Text>
         <Box sx={{ position: 'absolute', right: 6 }}>
           <Menu transition="rotate-right" transitionDuration={100} transitionTimingFunction="ease">
-            <Menu.Label>Nustatymai</Menu.Label>
+            <Menu.Label>Settings</Menu.Label>
             <Menu.Item
               icon={<FaUserEdit />}
               onClick={() => {
                 setModalOpen(true);
               }}
             >
-              Vardas
+              Name
             </Menu.Item>
             <Menu.Item
               icon={colorMode === 'dark' ? <BsFillSunFill /> : <BsFillMoonFill />}
               onClick={() => setColorMode((prev) => (prev === 'dark' ? 'light' : 'dark'))}
             >
-              Spalvų tema
+              Color theme
             </Menu.Item>
           </Menu>
         </Box>
