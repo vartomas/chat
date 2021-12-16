@@ -4,15 +4,9 @@ import { BiPaperPlane } from 'react-icons/bi';
 import moment from 'moment';
 
 import { useChat } from '../hooks/useChat';
-import { User } from '../App';
 
-interface Props {
-  name: string;
-  setUsers: React.Dispatch<React.SetStateAction<User[]>>;
-}
-
-const ChatBox: FC<Props> = ({ name, setUsers }) => {
-  const { input, loading, messages, socketId, messagesEndRef, onInputChange, onSubmit, catchEnter, getMessages } = useChat(name, setUsers);
+const ChatBox = () => {
+  const { input, loading, messages, socketId, messagesEndRef, onInputChange, onSubmit, catchEnter, getMessages } = useChat();
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>

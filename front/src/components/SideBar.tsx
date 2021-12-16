@@ -2,19 +2,21 @@ import { FC } from 'react';
 import { BsFillSunFill, BsFillMoonFill } from 'react-icons/bs';
 import { FaUserEdit } from 'react-icons/fa';
 import { Box, Center, Divider, Text, Menu } from '@mantine/core';
+import { useSelector } from 'react-redux';
 
-import { ColorScheme } from '../App';
-import { User } from '../App';
+import { ColorScheme } from '@mantine/core';
+import { RootState } from '../state/store';
 
 interface Props {
-  name: string;
-  users: User[];
   colorMode: string;
   setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setColorMode: (val: ColorScheme | ((prevState: ColorScheme) => ColorScheme)) => void;
 }
 
-const SideBar: FC<Props> = ({ name, users, colorMode, setModalOpen, setColorMode }) => {
+const SideBar: FC<Props> = ({ colorMode, setModalOpen, setColorMode }) => {
+  const user = useSelector((state: RootState) => state.user);
+  const chat = useSelector((state: RootState) => state.chat);
+
   return (
     <Box
       sx={(theme) => ({
@@ -23,7 +25,7 @@ const SideBar: FC<Props> = ({ name, users, colorMode, setModalOpen, setColorMode
       })}
     >
       <Center sx={{ width: '100%', height: '5%', position: 'relative' }}>
-        <Text size="md">{name}</Text>
+        <Text size="md">{user.name}</Text>
         <Box sx={{ position: 'absolute', right: 6 }}>
           <Menu transition="rotate-right" transitionDuration={100} transitionTimingFunction="ease">
             <Menu.Label>Settings</Menu.Label>
@@ -46,8 +48,11 @@ const SideBar: FC<Props> = ({ name, users, colorMode, setModalOpen, setColorMode
       </Center>
       <Divider />
       <Box>
-        {users.map((x) => (
-          <Text key={x.socketId}>{x.name}</Text>
+        {chat.users.map((x) => (
+          <Text key={x.socketId}>
+            {x.name}
+            {x.socketId === user.socketId && ' (You)'}
+          </Text>
         ))}
       </Box>
     </Box>

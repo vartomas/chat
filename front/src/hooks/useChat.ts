@@ -2,8 +2,11 @@ import { useState, useEffect, KeyboardEvent, useRef } from 'react';
 import axios from 'axios';
 import { v1 as uuid } from 'uuid';
 import { io } from 'socket.io-client';
+import { useSelector, useDispatch } from 'react-redux';
 
-import { User } from '../App';
+import { User } from '../Types';
+import { RootState } from '../state/store';
+import { actions } from '../state/actions';
 
 interface MessageResponse {
   _id?: string;
@@ -16,12 +19,17 @@ interface MessageResponse {
 
 const socket = io('http://localhost:5000');
 
-export const useChat = (name: string, setUsers: React.Dispatch<React.SetStateAction<User[]>>) => {
+export const useChat = () => {
+  const name = useSelector((state: RootState) => state.user.name);
+  const users = useSelector((state: RootState) => state.chat.users);
+
   const [input, setInput] = useState<string>('');
   const [messagesLoading, setMessagesLoading] = useState<boolean>(false);
   const [messages, setMessages] = useState<MessageResponse[]>([]);
 
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     getMessages();
@@ -30,15 +38,16 @@ export const useChat = (name: string, setUsers: React.Dispatch<React.SetStateAct
   useEffect(() => {
     socket.on('connect', () => {
       socket.emit('user:connect', name);
+      dispatch(actions.user.setSocketId(socket.id));
     });
     socket.on('user:connect', (user) => {
-      setUsers((prev) => [user, ...prev]);
+      dispatch(actions.chat.setUsers([user, ...users]));
     });
     socket.on('user:disconnect', (socketId) => {
-      setUsers((prev) => prev.filter((x) => x.socketId !== socketId));
+      dispatch(actions.chat.setUsers(users.filter((x) => x.socketId !== socketId)));
     });
     socket.on('user:list', (users) => {
-      setUsers(users);
+      dispatch(actions.chat.setUsers(users));
     });
     socket.on('message:new', (message) => {
       setMessages((prev) => [message, ...prev]);
@@ -88,7 +97,7 @@ export const useChat = (name: string, setUsers: React.Dispatch<React.SetStateAct
       body: input,
       date: new Date(),
       socketId: socket.id,
-      username: name,
+      username: name || 'Guest',
     };
 
     await sendMessage(message);
