@@ -1,12 +1,16 @@
-import { FC } from 'react';
 import { ActionIcon, Box, Center, Text, Textarea, LoadingOverlay, Paper } from '@mantine/core';
 import { BiPaperPlane } from 'react-icons/bi';
+import { useSelector } from 'react-redux';
 import moment from 'moment';
 
 import { useChat } from '../hooks/useChat';
+import { RootState } from '../state/store';
 
 const ChatBox = () => {
-  const { input, loading, messages, socketId, messagesEndRef, onInputChange, onSubmit, catchEnter, getMessages } = useChat();
+  const { input, messagesEndRef, onInputChange, onSubmit, catchEnter, getMessages } = useChat();
+
+  const chat = useSelector((state: RootState) => state.chat);
+  const user = useSelector((state: RootState) => state.user);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -31,7 +35,7 @@ const ChatBox = () => {
       >
         <div ref={messagesEndRef} />
 
-        {messages.map((x) => (
+        {chat.messages.map((x) => (
           <Paper
             key={x.id}
             padding="sm"
@@ -39,7 +43,7 @@ const ChatBox = () => {
             radius="md"
             mb={10}
             mx={10}
-            ml={socketId === x.socketId ? 'auto' : 10}
+            ml={user.socketId === x.socketId ? 'auto' : 10}
             sx={{ width: '70%' }}
           >
             <Text size="xs" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -98,7 +102,7 @@ const ChatBox = () => {
         </form>
       </Box>
 
-      <LoadingOverlay visible={loading} />
+      <LoadingOverlay visible={chat.loading} />
     </Box>
   );
 };

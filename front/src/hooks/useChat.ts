@@ -4,28 +4,17 @@ import { v1 as uuid } from 'uuid';
 import { io } from 'socket.io-client';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { User } from '../Types';
 import { RootState } from '../state/store';
 import { actions } from '../state/actions';
-
-interface MessageResponse {
-  _id?: string;
-  id: string;
-  body: string;
-  date: Date;
-  socketId: string;
-  username: string;
-}
+import { Message } from '../Types';
 
 const socket = io('http://localhost:5000');
 
 export const useChat = () => {
   const name = useSelector((state: RootState) => state.user.name);
-  const users = useSelector((state: RootState) => state.chat.users);
+  const chat = useSelector((state: RootState) => state.chat);
 
   const [input, setInput] = useState<string>('');
-  const [messagesLoading, setMessagesLoading] = useState<boolean>(false);
-  const [messages, setMessages] = useState<MessageResponse[]>([]);
 
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
@@ -33,7 +22,7 @@ export const useChat = () => {
 
   useEffect(() => {
     getMessages();
-  }, []);
+  }, []); // eslint-disable-line
 
   useEffect(() => {
     socket.on('connect', () => {
@@ -41,50 +30,49 @@ export const useChat = () => {
       dispatch(actions.user.setSocketId(socket.id));
     });
     socket.on('user:connect', (user) => {
-      dispatch(actions.chat.setUsers([user, ...users]));
+      dispatch(actions.chat.setUsers([user, ...chat.users]));
     });
     socket.on('user:disconnect', (socketId) => {
-      dispatch(actions.chat.setUsers(users.filter((x) => x.socketId !== socketId)));
+      dispatch(actions.chat.setUsers(chat.users.filter((x) => x.socketId !== socketId)));
     });
     socket.on('user:list', (users) => {
       dispatch(actions.chat.setUsers(users));
     });
     socket.on('message:new', (message) => {
-      setMessages((prev) => [message, ...prev]);
+      dispatch(actions.chat.addMessage(message));
       scrollToBottom();
     });
-  }, []);
+  }, []); // eslint-disable-line
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const getMessages = async () => {
-    setMessagesLoading(true);
+    dispatch(actions.chat.setMessagesLoading(true));
 
     try {
-      const response = await axios.get<MessageResponse[]>(`http://localhost:5000/messages/${messages.length}`);
-      setMessages((prev) => [...prev, ...response.data]);
+      const response = await axios.get<Message[]>(`http://localhost:5000/messages/${chat.messages.length}`);
+      dispatch(actions.chat.setMessages(response.data));
     } catch (error) {
       console.error(error);
     }
 
-    setMessagesLoading(false);
+    dispatch(actions.chat.setMessagesLoading(false));
   };
 
-  const sendMessage = async (message: Omit<MessageResponse, '_id'>) => {
-    setMessages((prev) => [message, ...prev]);
+  const sendMessage = async (message: Message) => {
+    dispatch(actions.chat.addMessage(message));
 
     try {
       const response = await axios.post<{ success: boolean; _id: string }>('http://localhost:5000/message/', message);
 
       if (response.data.success) {
-        setMessages((prev) => prev.map((x) => (x.id === message.id ? { ...x, _id: response.data._id } : x)));
         socket?.emit('message:new', { ...message, _id: response.data._id });
         scrollToBottom();
       }
     } catch (error) {
-      setMessages((prev) => [...prev.slice(1, 0)]);
+      dispatch(actions.chat.removeLastMessage());
       console.error(error);
     }
   };
@@ -113,9 +101,6 @@ export const useChat = () => {
 
   return {
     input,
-    loading: messagesLoading,
-    messages,
-    socketId: socket?.id,
     messagesEndRef,
     onInputChange: setInput,
     onSubmit: handleSubmit,

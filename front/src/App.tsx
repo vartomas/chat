@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { MantineProvider, Box, Grid, Col } from '@mantine/core';
+import { useLocalStorageValue } from '@mantine/hooks';
 
-import { useApp } from './hooks/useApp';
 import SideBar from './components/SideBar';
 import ChatBox from './components/ChatBox';
 import NameChangeModal from './components/NameChangeModal';
 
-import { User } from './Types';
+type ColorScheme = 'dark' | 'light';
 
 const App = () => {
-  const { colorMode, setColorMode } = useApp();
+  const [colorMode, setColorMode] = useLocalStorageValue<ColorScheme>({ key: 'color-scheme', defaultValue: 'dark' });
+
   const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   return (
@@ -19,7 +20,7 @@ const App = () => {
       >
         <Grid gutter={0} sx={{ height: '100%' }}>
           <Col span={4} xs={4} md={3} lg={2} xl={1.5}>
-            <SideBar colorMode={colorMode} setModalOpen={setModalOpen} setColorMode={setColorMode} />
+            <SideBar colorMode={colorMode} setColorMode={setColorMode} setModalOpen={setModalOpen} />
           </Col>
           <Col span={8} xs={8} md={9} lg={10} xl={10.5}>
             <ChatBox />
