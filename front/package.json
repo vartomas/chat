@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@mantine/core": "^3.2.3",
-    "@mantine/hooks": "^3.2.3",
+    "@mantine/core": "3.4.3",
+    "@mantine/hooks": "3.4.3",
     "@reduxjs/toolkit": "^1.7.1",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",

@@ -85,7 +85,7 @@ const ChatBox = () => {
                 paddingBottom: 5,
               }}
               styles={{
-                root: { height: '100%' },
+                wrapper: { height: '100%' },
                 input: { height: '100%' },
               }}
               value={input}

@@ -47,13 +47,28 @@ const SideBar: FC<Props> = ({ colorMode, setColorMode, setModalOpen }) => {
       </Center>
       <Divider />
       <Text align="center">Connected users:</Text>
-      <Box>
-        {chat.users.map((x) => (
-          <Text key={x.socketId} align="center">
-            {x.name}
-            {x.socketId === user.socketId && ' (You)'}
-          </Text>
-        ))}
+      <Box
+        sx={(theme) => ({
+          overflowY: 'auto',
+          '::-webkit-scrollbar': {
+            width: 12,
+          },
+          '::-webkit-scrollbar-thumb': {
+            backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[5],
+            borderRadius: 6,
+            border: '3px solid transparent',
+            backgroundClip: 'content-box',
+          },
+        })}
+      >
+        {chat.users
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((x) => (
+            <Text key={x.socketId} align="center">
+              {x.name}
+              {x.socketId === user.socketId && ' (You)'}
+            </Text>
+          ))}
       </Box>
     </Box>
   );

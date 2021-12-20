@@ -1,9 +1,10 @@
 import { FC, useState } from 'react';
 import { useFocusTrap } from '@mantine/hooks';
 import { Modal, TextInput } from '@mantine/core';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { actions } from '../state/actions';
+import { RootState } from '../state/store';
 
 interface Props {
   modalOpen: boolean;
@@ -15,6 +16,8 @@ const NameChangeModal: FC<Props> = ({ modalOpen, setModalOpen }) => {
   const [nameInput, setNameInput] = useState<string>('');
   const [nameInputError, setNameInputError] = useState(false);
 
+  const socket = useSelector((state: RootState) => state.socket.socket);
+
   const nameInputRef = useFocusTrap(true);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -24,19 +27,13 @@ const NameChangeModal: FC<Props> = ({ modalOpen, setModalOpen }) => {
     }
     setNameInputError(false);
     dispatch(actions.user.setName(nameInput));
+    socket?.emit('name:change', nameInput);
     localStorage.setItem('name', nameInput);
     setModalOpen(false);
   };
 
   return (
-    <Modal
-      transition="rotate-left"
-      transitionDuration={500}
-      transitionTimingFunction="ease"
-      opened={modalOpen}
-      onClose={() => setModalOpen(false)}
-      title="Prisistatyk!"
-    >
+    <Modal transition="rotate-left" transitionDuration={500} opened={modalOpen} onClose={() => setModalOpen(false)} title="Prisistatyk!">
       <form onSubmit={handleSubmit} ref={nameInputRef}>
         <TextInput
           value={nameInput}

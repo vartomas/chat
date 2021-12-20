@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { RootState } from '../state/store';
 import { actions } from '../state/actions';
-import { Message } from '../Types';
+import { Message, User } from '../Types';
 
 const socket = io('http://localhost:5000');
 
@@ -25,15 +25,17 @@ export const useChat = () => {
   }, []); // eslint-disable-line
 
   useEffect(() => {
+    dispatch(actions.socket.setSocket(socket));
+
     socket.on('connect', () => {
       socket.emit('user:connect', name);
       dispatch(actions.user.setSocketId(socket.id));
     });
-    socket.on('user:connect', (user) => {
-      dispatch(actions.chat.setUsers([user, ...chat.users]));
+    socket.on('user:connect', (users) => {
+      dispatch(actions.chat.setUsers(users));
     });
-    socket.on('user:disconnect', (socketId) => {
-      dispatch(actions.chat.setUsers(chat.users.filter((x) => x.socketId !== socketId)));
+    socket.on('user:disconnect', (users) => {
+      dispatch(actions.chat.setUsers(users));
     });
     socket.on('user:list', (users) => {
       dispatch(actions.chat.setUsers(users));
@@ -41,6 +43,10 @@ export const useChat = () => {
     socket.on('message:new', (message) => {
       dispatch(actions.chat.addMessage(message));
       scrollToBottom();
+    });
+    socket.on('name:change', (user: User) => {
+      const newUserList = [...chat.users.filter((x) => x.socketId !== user.socketId), user];
+      dispatch(actions.chat.setUsers(newUserList));
     });
   }, []); // eslint-disable-line
 
@@ -63,6 +69,7 @@ export const useChat = () => {
 
   const sendMessage = async (message: Message) => {
     dispatch(actions.chat.addMessage(message));
+    console.log(chat.users);
 
     try {
       const response = await axios.post<{ success: boolean; _id: string }>('http://localhost:5000/message/', message);
