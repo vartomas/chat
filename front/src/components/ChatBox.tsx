@@ -46,10 +46,12 @@ const ChatBox = () => {
             ml={user.socketId === x.socketId ? 'auto' : 10}
             sx={{ width: '70%' }}
           >
-            <Text size="xs" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text size="xs" mb={5} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <b>{x.username}</b> {moment(x.date).format('Do MMMM YYYY, h:mm a')}
             </Text>
-            <Text mt={5}>{x.body}</Text>
+            {x.body.split('\n').map((y) => (
+              <Text>{y}</Text>
+            ))}
           </Paper>
         ))}
 
