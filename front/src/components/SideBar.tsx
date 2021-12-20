@@ -46,9 +46,10 @@ const SideBar: FC<Props> = ({ colorMode, setColorMode, setModalOpen }) => {
         </Box>
       </Center>
       <Divider />
+      <Text align="center">Connected users:</Text>
       <Box>
         {chat.users.map((x) => (
-          <Text key={x.socketId}>
+          <Text key={x.socketId} align="center">
             {x.name}
             {x.socketId === user.socketId && ' (You)'}
           </Text>
