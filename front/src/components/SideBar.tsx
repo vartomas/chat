@@ -61,14 +61,12 @@ const SideBar: FC<Props> = ({ colorMode, setColorMode, setModalOpen }) => {
           },
         })}
       >
-        {chat.users
-          .sort((a, b) => a.name.localeCompare(b.name))
-          .map((x) => (
-            <Text key={x.socketId} align="center">
-              {x.name}
-              {x.socketId === user.socketId && ' (You)'}
-            </Text>
-          ))}
+        {chat.users.map((x) => (
+          <Text key={x.socketId} align="center">
+            {x.name}
+            {x.socketId === user.socketId && ' (You)'}
+          </Text>
+        ))}
       </Box>
     </Box>
   );

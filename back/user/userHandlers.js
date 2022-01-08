@@ -14,8 +14,8 @@ module.exports = (io, socket) => {
   };
 
   const handleNameChange = (name) => {
-    io.emit('name:change', { name, socketId: socket.id });
     users = [...users.filter((x) => x.socketId !== socket.id), { name, socketId: socket.id }];
+    io.emit('name:change', users);
   };
 
   socket.on('user:connect', userConnected);

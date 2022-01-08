@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { RootState } from '../state/store';
 import { actions } from '../state/actions';
-import { Message, User } from '../Types';
+import { Message } from '../Types';
 
 const socket = io('http://localhost:5000');
 
@@ -44,9 +44,8 @@ export const useChat = () => {
       dispatch(actions.chat.addMessage(message));
       scrollToBottom();
     });
-    socket.on('name:change', (user: User) => {
-      const newUserList = [...chat.users.filter((x) => x.socketId !== user.socketId), user];
-      dispatch(actions.chat.setUsers(newUserList));
+    socket.on('name:change', (users) => {
+      dispatch(actions.chat.setUsers(users));
     });
   }, []); // eslint-disable-line
 
@@ -59,7 +58,7 @@ export const useChat = () => {
 
     try {
       const response = await axios.get<Message[]>(`http://localhost:5000/messages/${chat.messages.length}`);
-      dispatch(actions.chat.setMessages(response.data));
+      dispatch(actions.chat.setMessages([...chat.messages, ...response.data]));
     } catch (error) {
       console.error(error);
     }
